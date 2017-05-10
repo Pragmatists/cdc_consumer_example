@@ -2,6 +2,7 @@ package com.pragmatists.cdc.domain;
 
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.pragmatists.cdc.domain.Book;
+import com.pragmatists.cdc.infrastructure.BooksProviderConfiguration;
 import com.pragmatists.cdc.ui.JsonMapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -12,24 +13,28 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.String.format;
+
 @Service
 public class BooksReader {
 
     private final OkHttpClient httpClient;
     private final JsonMapper jsonMapper;
+    private final BooksProviderConfiguration providerConfiguration;
 
     @Autowired
-    public BooksReader(JsonMapper jsonMapper) {
+    public BooksReader(JsonMapper jsonMapper, BooksProviderConfiguration providerConfiguration) {
         this.jsonMapper = jsonMapper;
+        this.providerConfiguration = providerConfiguration;
         httpClient = new OkHttpClient.Builder().build();
     }
 
-    public List<Book> all() {
-        Request request = new Request.Builder().url("http://localhost:8080/books").build();
+    public Books all() {
+        Request request = new Request.Builder().url(format("http://%s:%d/books", providerConfiguration.getHost(), providerConfiguration.getPort())).build();
 
         try {
             Response response = httpClient.newCall(request).execute();
-            return jsonMapper.transform(response, TypeFactory.defaultInstance().constructCollectionType(List.class, Book.class));
+            return jsonMapper.transform(response, TypeFactory.defaultInstance().constructType(Books.class));
 
         } catch (IOException e) {
             throw new RuntimeException(e);

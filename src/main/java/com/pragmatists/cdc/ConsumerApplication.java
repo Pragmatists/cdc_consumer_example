@@ -1,27 +1,22 @@
 package com.pragmatists.cdc;
 
-import com.pragmatists.cdc.domain.Book;
-import com.pragmatists.cdc.ui.BooksReader;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.pragmatists.cdc.domain.Books;
+import com.pragmatists.cdc.domain.BooksReader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.util.List;
+import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
+@Import(BooksReaderConfiguration.class)
 public class ConsumerApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(ConsumerApplication.class, args);
 
         BooksReader booksReader = applicationContext.getBean(BooksReader.class);
-        List<Book> books = booksReader.all();
+        Books books = booksReader.all();
 
-        System.out.println(String.format("Super we have read %d books", books.size()));
-        System.out.println("With titles:");
-        books.stream().forEach(book -> {
-            System.out.println("\t - " + book.title);
-        });
+        System.out.println(String.format("Super we have read %d books:", books.books.size()));
     }
 }

@@ -1,6 +1,10 @@
 buildscript {
     ext {
         springBootVersion = '1.5.3.RELEASE'
+        okhttp_version = '3.4.2'
+        junit_version = '4.12'
+        assertj_version = '3.7.0'
+        pactjvm_version = '3.3.9'
     }
     repositories {
         mavenCentral()
@@ -11,7 +15,6 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 
 version = '1.0.0-SNAPSHOT'
@@ -22,8 +25,29 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    cdcTests
+}
+
+task cdcTest(type: Test) {
+    systemProperties['pact.rootDir'] = "../pacts"
+    testClassesDir = sourceSets.cdcTests.output.classesDir
+    classpath = sourceSets.cdcTests.runtimeClasspath
+}
+
+check.dependsOn cdcTest
+
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-web')
-    compile 'com.squareup.okhttp3:okhttp:3.7.0'
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile "com.squareup.okhttp3:okhttp:${okhttp_version}"
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+    testCompile "junit:junit:${junit_version}"
+
+    cdcTestsCompile sourceSets.main.output
+    cdcTestsCompile sourceSets.test.output
+    cdcTestsCompile "org.springframework.boot:spring-boot-starter-web"
+    cdcTestsCompile "com.squareup.okhttp3:okhttp:${okhttp_version}"
+    cdcTestsCompile "org.springframework.boot:spring-boot-starter-test"
+    cdcTestsCompile "org.assertj:assertj-core:${assertj_version}"
+    cdcTestsCompile "au.com.dius:pact-jvm-consumer-junit_2.11:${pactjvm_version}"
 }
