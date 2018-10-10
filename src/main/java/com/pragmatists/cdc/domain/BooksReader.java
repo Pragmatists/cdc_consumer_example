@@ -1,7 +1,6 @@
 package com.pragmatists.cdc.domain;
 
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.pragmatists.cdc.domain.Book;
 import com.pragmatists.cdc.infrastructure.BooksProviderConfiguration;
 import com.pragmatists.cdc.ui.JsonMapper;
 import okhttp3.OkHttpClient;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 
 import static java.lang.String.format;
 
