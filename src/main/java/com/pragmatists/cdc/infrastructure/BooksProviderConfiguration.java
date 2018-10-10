@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BooksProviderConfiguration {
-    private int port = 8080;
+    private int port = 8180;
     private String host = "localhost";
 
     public BooksProviderConfiguration setPort(int port) {

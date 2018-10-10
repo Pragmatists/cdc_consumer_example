@@ -17,6 +17,6 @@ public class ConsumerApplication {
         BooksReader booksReader = applicationContext.getBean(BooksReader.class);
         Books books = booksReader.all();
 
-        System.out.println(String.format("Super we have read %d books:", books.books.size()));
+        System.out.println(String.format("Super we have read %d books: %s", books.books.size(), books.books));
     }
 }
