@@ -8,7 +8,6 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
 import com.pragmatists.cdc.domain.Book;
-import com.pragmatists.cdc.domain.Books;
 import com.pragmatists.cdc.domain.BooksReader;
 import com.pragmatists.cdc.infrastructure.BooksProviderConfiguration;
 import org.junit.Before;
@@ -19,13 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BooksReaderConfiguration.class, webEnvironment = RANDOM_PORT)
-public class ReadingAllBooksPactTest {
-
+public class CreatingBookPactTest {
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("books_provider", this);
 
@@ -43,47 +41,31 @@ public class ReadingAllBooksPactTest {
     }
 
     @Pact(provider = "books_provider", consumer = "books_consumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public PactFragment fragmentForCreatingBook(PactDslWithProvider builder) {
         return builder
-                .given("there are books to read")
-                .uponReceiving("Request to get all books")
-                    .path("/books")
-                    .method("GET")
+                .uponReceiving("Request to create a book")
+                .method("POST")
+                .path("/books")
+                .headers("Content-Type", "application/json; charset=utf-8")
+                .body(createBookBody())
                 .willRespondWith()
-                    .status(200)
-                    .body(booksResponseBody())
+                .status(204)
                 .toFragment();
     }
 
-    @Test
-    @PactVerification("books_provider")
-    public void shouldReturnAllBooks() throws Exception {
-        Books books = booksReader.all();
-
-        assertThat(books.books)
-                .hasSize(2)
-                .containsExactly(
-                        new Book("0765377063", "The Three-Body Problem", "Liu Cixin", 2007),
-                        new Book("076537708X", "The Dark Forest", "Liu Cixin", 2008)
-                );
+    private DslPart createBookBody() {
+        return new PactDslJsonBody()
+                .stringType("author")
+                .stringType("title")
+                .numberType("year")
+                .nullValue("id");
     }
 
-    private DslPart booksResponseBody() {
-        return new PactDslJsonBody()
-                .eachLike("books") //.array().object()
-//                    .object()
-                        .stringType("id", "0765377063")
-                        .stringType("title", "The Three-Body Problem")
-                        .stringType("author", "Liu Cixin")
-                        .numberType("year", 2007)
-                    .closeObject()
-                    .object()
-                        .stringType("id", "076537708X")
-                        .stringType("title", "The Dark Forest")
-                        .stringType("author", "Liu Cixin")
-                        .numberType("year", 2008)
-                    .closeObject()
-                .closeArray();
-
+    @PactVerification("books_provider")
+    @Test
+    public void verifyPactForCreatingBook() {
+        assertThatCode(() -> {
+            booksReader.add(new Book(null, "title", "author", 1900));
+        }).doesNotThrowAnyException();
     }
 }
